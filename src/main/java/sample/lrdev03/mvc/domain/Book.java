@@ -1,8 +1,8 @@
 package sample.lrdev03.mvc.domain;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,21 +12,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
 
 @Entity(name="MyBook")
-@Table(name="BOOKS", catalog = "myportaldb", uniqueConstraints = {
+@Table(name="books", catalog = "myportaldb", uniqueConstraints = {
 		@UniqueConstraint(columnNames = "TITLE"),
 		@UniqueConstraint(columnNames = "ISBN_NUMBER") })
 public class Book implements Serializable{
 
-	private static final long serialVersionUID = -6639736156994732462L;
+	private static final long serialVersionUID = -6638836156994732462L;
 	
-	private int bookId;
+	private long bookId;
 	
 	private String title;
 	
@@ -34,9 +34,9 @@ public class Book implements Serializable{
 	
 	private Long isbnNumber;
 	
-	private Set<Author> authors = new HashSet<Author>(0);	
+	private List<Author> authors = new ArrayList<Author>();
 
-	public Book(String title, Set<Author> authors, long isbnNumber, String summary) {
+	public Book(String title, List<Author> authors, long isbnNumber, String summary) {
 		this.title = title;
 		this.authors = authors;
 		this.isbnNumber = isbnNumber;
@@ -51,11 +51,11 @@ public class Book implements Serializable{
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name="BOOK_ID")
-	public int getBookId() {
+	public long getBookId() {
 		return bookId;
 	}
 
-	public void setBookId(int bookId) {
+	public void setBookId(long bookId) {
 		this.bookId = bookId;
 	}
 	
@@ -69,17 +69,17 @@ public class Book implements Serializable{
 		this.title = title;
 	}
 	
-	@ManyToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "BOOK_AUTHOR", catalog = "myportaldb", joinColumns = { 
-			@JoinColumn(name = "BOOK_ID")},
-			inverseJoinColumns = { @JoinColumn(name = "AUTHOR_ID") })
-	public Set<Author> getAuthors() {
+	@OneToMany(orphanRemoval=true)
+	@JoinTable(name = "BOOK_AUTHORS", joinColumns = {
+			@JoinColumn(name = "BOOK_ID")}, inverseJoinColumns = {
+			@JoinColumn(name = "AUTHOR_ID")})
+	public List<Author> getAuthors() {
 		return authors;
 	}
-
-	public void setAuthors(Set<Author> authors) {
-		this.authors = authors;
+	public void setAuthors(List<Author> list) {
+		this.authors = list;
 	}
+	
 
 	@Column(name="ISBN_NUMBER")
 	public Long getIsbnNumber() {
@@ -98,5 +98,61 @@ public class Book implements Serializable{
 	public void setSummary(String summary) {
 		this.summary = summary;
 	}
+
+	@Override
+	public String toString() {
+		return "Book [bookId=" + bookId + ", title=" + title + ", summary="
+				+ summary + ", isbnNumber=" + isbnNumber + ", authors="
+				+ authors + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((authors == null) ? 0 : authors.hashCode());
+		result = prime * result + (int) (bookId ^ (bookId >>> 32));
+		result = prime * result
+				+ ((isbnNumber == null) ? 0 : isbnNumber.hashCode());
+		result = prime * result + ((summary == null) ? 0 : summary.hashCode());
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Book other = (Book) obj;
+		if (authors == null) {
+			if (other.authors != null)
+				return false;
+		} else if (!authors.equals(other.authors))
+			return false;
+		if (bookId != other.bookId)
+			return false;
+		if (isbnNumber == null) {
+			if (other.isbnNumber != null)
+				return false;
+		} else if (!isbnNumber.equals(other.isbnNumber))
+			return false;
+		if (summary == null) {
+			if (other.summary != null)
+				return false;
+		} else if (!summary.equals(other.summary))
+			return false;
+		if (title == null) {
+			if (other.title != null)
+				return false;
+		} else if (!title.equals(other.title))
+			return false;
+		return true;
+	}
+
+	
 	
 }

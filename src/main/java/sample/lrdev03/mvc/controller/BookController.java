@@ -1,7 +1,10 @@
 package sample.lrdev03.mvc.controller;
 
 import java.util.List;
+
+import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,7 +14,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
+import sample.lrdev03.mvc.domain.Author;
 import sample.lrdev03.mvc.domain.Book;
+import sample.lrdev03.mvc.service.AuthorManager;
 import sample.lrdev03.mvc.service.BookManager;
 
 @Controller(value="bookController")
@@ -28,12 +33,33 @@ public class BookController {
 		log.info("bookService constructor");
 		this.bookService = bookService;
 	}
+	
+	@Autowired
+	@Qualifier("myAuthorService")
+	private AuthorManager authorService;
+
+	public void setAuthorService(AuthorManager authorService) {
+		log.info("authorService constructor");
+		this.authorService = authorService;
+	}
+
 
 	// --maps the incoming portlet request to this method
 	@RenderMapping
-	public String showBooks(RenderResponse response) {
-		log.info("showBooks");
+	public String showBooks(RenderRequest request, RenderResponse response) {
+		log.info("showBooks myaction = "+request.getParameter("myaction"));
 		return "home";
+	}
+	
+	@RenderMapping(params="myaction=authors")                          
+	public String showAddAuthorForm(RenderResponse response) {   
+		log.info("showAuthorForm");
+	   return "addAuthorForm";
+	  }
+	
+	@ModelAttribute("author")
+	public Author getCommandObject() {
+		return new Author();
 	}
 	
 	@ExceptionHandler({ Exception.class })
@@ -46,5 +72,4 @@ public class BookController {
 	public List<Book> getBooks() {
 		return bookService.getBookList();
 	}
-	
 }

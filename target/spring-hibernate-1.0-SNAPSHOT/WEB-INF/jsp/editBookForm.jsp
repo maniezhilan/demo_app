@@ -21,9 +21,11 @@
 		</tr>
 		<tr>
 			<td>Author:<font style="color: #C11B17;">*</font></td>
-			<td><form:input path="author" /></td>
-			<td><font style="color: #C11B17;"><form:errors
-				path="author" /></font></td>
+			<td><font style="color: #C11B17;"><form:select path="authors" multiple="true">
+				<form:option value="">----Select Author----</form:option>
+				<form:options items="${book.authors}" itemLabel="name" itemValue="id"/>
+			</form:select><form:errors
+				path="authors" /></font></td>
 		</tr>
 		<tr>
 			<td>ISBN:<font style="color: #C11B17;">*</font></td>

@@ -18,20 +18,19 @@ public class HibernateBookDao implements BookDAO{
 	public List<Book> getBookList() {
 		return sessionFactory.getCurrentSession().createQuery("from MyBook as book").list();
 	}
-	public Book getBook(Long bookId) {
-		String hql = "from MyBook as book where bookId= :bookId";
-		return (Book) sessionFactory.getCurrentSession().createQuery(hql).setParameter("bookId",bookId).uniqueResult();
+	public Book getBook(Long isbn) {
+		String hql = "from MyBook as book where book.isbnNumber = :isbn";
+		return (Book) sessionFactory.getCurrentSession().createQuery(hql).setParameter("isbn",isbn).uniqueResult();
 	}
 	public void addBook(final Book book) {
 		sessionFactory.getCurrentSession().save(book);
 	}
 	public void updateBook(Book book) {
-		String hql = "update book where bookId= :bookId";
-		sessionFactory.getCurrentSession().createQuery(hql).setParameter("bookId",book.getBookId()).executeUpdate();
+		sessionFactory.getCurrentSession().update(book);
 	}
-	public void deleteBook(Long bookId) {
-		String hql = "delete book where book.bookId= :bookId";
-		sessionFactory.getCurrentSession().createQuery(hql).setParameter("bookId",bookId).executeUpdate();
+	public void deleteBook(Long isbn) {
+		String hql = "delete MyBook as book where book.isbnNumber= :isbn";
+		sessionFactory.getCurrentSession().createQuery(hql).setParameter("isbn",isbn).executeUpdate();
 	}
 
 }

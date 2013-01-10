@@ -1,8 +1,11 @@
 package sample.lrdev03.mvc.controller;
 
+import java.util.List;
+
 import javax.portlet.ActionResponse;
 import javax.portlet.RenderResponse;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -18,16 +21,23 @@ import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
 import sample.lrdev03.mvc.domain.Book;
+import sample.lrdev03.mvc.service.AuthorManager;
 import sample.lrdev03.mvc.service.BookManager;
-import sample.lrdev03.mvc.util.LongNumberPropertyEditor;
+import sample.lrdev03.mvc.util.MyCustomCollectionEditor;
 
 @Controller(value = "addBookController")
 @RequestMapping(value = "VIEW")
 @SessionAttributes(types = Book.class)
 public class AddBookController {
+	static Logger log = Logger.getLogger(AddBookController.class.getName());
+
 	@Autowired
 	@Qualifier("myBookService")
 	private BookManager bookService;
+	
+	@Autowired
+	@Qualifier("myAuthorService")
+	private AuthorManager authorService;
 
 	public void setBookService(BookManager bookService) {
 		this.bookService = bookService;
@@ -35,7 +45,10 @@ public class AddBookController {
 
 	@ModelAttribute("book")
 	public Book getCommandObject() {
-		return new Book();
+		Book book = new Book();
+		book.setAuthors(authorService.getAuthors());
+		log.info("Book "+book);
+		return book;
 	}
 
 	@RenderMapping(params = "myaction=addBookForm")
@@ -43,9 +56,33 @@ public class AddBookController {
 		return "addBookForm";
 	}
 
-	@InitBinder("book")
+	@InitBinder
 	public void initBinder(WebDataBinder binder) {
-		binder.registerCustomEditor(Long.class, new LongNumberPropertyEditor());
+		log.info("inside binder");
+		binder.registerCustomEditor(List.class, new MyCustomCollectionEditor(List.class){
+			@Override
+			protected Object convertElement(Object element)
+		    {
+				log.info("inside convertElement"+element);
+				Long id = null;
+		        if(element instanceof String && !((String)element).equals("")){
+		            //From the JSP 'element' will be a String
+		            try{
+		                id = Long.parseLong((String) element);
+		            }
+		            catch (NumberFormatException e) {
+		                log.info("Element was " + ((String) element));
+		                e.printStackTrace();
+		            }
+		        }
+		        else if(element instanceof Long) {
+		            //From the database 'element' will be a Long
+		            id = (Long) element;
+		        }
+		        return id != null ? authorService.getAuthor(id) : null;
+		    }
+		  
+		});
 	}
 
 	@ExceptionHandler({ Exception.class })

@@ -56,7 +56,11 @@ function RemoveBook(row_id) {
 						</portlet:renderURL>					
 					"><b><c:out value="${book.title}" /></b></a>
 					</td>
-					<td><c:out value="${book.author}" /></td>
+					<td>
+					<c:forEach items="${book.authors}" var="authors"> 
+						<c:out value="${authors.name}"/>
+					</c:forEach>
+					</td>
 					<td><c:out value="${book.isbnNumber}" /></td>
 					<c:set var="fck_summary" value="${book.summary}"/>
 					<td>${fck_summary}</td>
